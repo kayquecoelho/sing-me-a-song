@@ -1,7 +1,9 @@
 describe("APP TESTS", () => {
   const name = "the 1";
   const link = "https://www.youtube.com/watch?v=KsZ6tROaVOQ";
-  const baseUrl = "http://localhost:3001/";
+  const baseUrl = "http://localhost:3000/";
+
+  beforeEach(() => cy.resetDatabase());
 
   it("should create a recommendation and vote successfully", () => {
     cy.visit(baseUrl);
@@ -26,17 +28,29 @@ describe("APP TESTS", () => {
 
   it("should navigate successfully between pages,", () => {
     cy.visit(baseUrl);
+    
+    cy.intercept("/recommendations/top/10").as("topTrendsRequest");
 
     cy.contains("Top").click();
 
-    cy.url().should("equal", "http://localhost:3001/top");
-    
+    cy.wait("@topTrendsRequest");
+
+    cy.url().should("equal", "http://localhost:3000/top");
+
+    cy.intercept("/recommendations/random").as("randomRequest");
+
     cy.contains("Random").click();
 
-    cy.url().should("equal", "http://localhost:3001/random");
+    cy.wait("@randomRequest");
+
+    cy.url().should("equal", "http://localhost:3000/random");
     
+    cy.intercept("/recommendations").as("home");;
+
     cy.contains("Home").click();
 
-    cy.url().should("equal", "http://localhost:3001/");
+    cy.wait("@home");
+
+    cy.url().should("equal", "http://localhost:3000/");
   });
 });
